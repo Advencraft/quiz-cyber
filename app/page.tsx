@@ -1,22 +1,35 @@
 "use client"
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Home() {
+  const [question, setQuestion] = useState<any>(null);
   useEffect(() => {
     async function fetchQuestion() {
       const { data, error } = await supabase
         .from('question')
-        .select('*')
-        .limit(1);
+        .select('*');
 
       if (error) console.error(error);
-      else console.log(data);
+      else setQuestion(data[0]); // On stocke la première question dans l’état
     }
 
     fetchQuestion();
   }, []);
 
-  return <h1>Bienvenue sur CyberQuiz</h1>;
+  return question ? (
+  <Card className="max-w-xl mx-auto mt-6">
+    <CardHeader>
+      <CardTitle>Question</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p>{question.texte}</p>
+    </CardContent>
+  </Card>
+) : (
+  <p>Chargement de la question...</p>
+);
+
 }
