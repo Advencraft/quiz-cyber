@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
 import Image from 'next/image';
-
+import Link from "next/link";
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner"
 import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle,} from "@/components/ui/empty"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Home() {
   const [question, setQuestion] = useState<any>(null);
@@ -107,19 +106,42 @@ export default function Home() {
 
       ) : (
 
-        <Empty className="w-full">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Spinner />
-            </EmptyMedia>
-            <EmptyTitle>Chargement de la question...</EmptyTitle>
-            <EmptyDescription>
-              Le Chargement peut durer un certain temps.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      )}
+        <Card className="max-w-4xl mx-auto mt-6">
+          <Empty className="w-full">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Spinner />
+              </EmptyMedia>
+              <EmptyTitle>Chargement de la question...</EmptyTitle>
+              <EmptyDescription>
+                Le Chargement peut durer un certain temps.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </Card>
 
+
+        /*    Seconde proposition du chargement de la page avec des Skeletons
+        <Card className="max-w-4xl mx-auto mt-6">
+          <div className="flex">
+            <div className="w-1/2 p-4">
+              <Skeleton className="h-[285px] w-[400px] rounded" />
+              <Skeleton className="h-[45px] w-[415px] mt-4 text-sm text-muted-foreground" />
+            </div>
+            <div className="w-1/2 p-4">
+              <Skeleton className="h-[20px] w-[65px] p-0 mb-4" />
+              <CardContent className="p-0">
+                <Skeleton className="h-[25px] w-[200px] text-lg font-semibold mb-4" />
+                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
+                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
+                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
+              </CardContent>
+            </div>
+          </div>
+        </Card>
+      */
+
+      )}
     </div>
   );
 }
