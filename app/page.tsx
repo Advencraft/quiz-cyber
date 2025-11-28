@@ -14,11 +14,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Home() {
   const [question, setQuestion] = useState<any>(null);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [explication, setExplication] = useState("");
+  const [afficherExplication, setAfficherExplication] = useState(false);
+
   useEffect(() => {
     async function fetchQuestion() {
       const { data, error } = await supabase
         .from('question')
-        .select(` id, texte, image_url, image_credit_nom, image_credit_url, reponses:reponse (id,texte,est_correcte)`)
+        .select(` id, texte, image_url, image_credit_nom, image_credit_url,explication, reponses:reponse (id,texte,est_correcte)`)
         .order('id', { ascending: true });
       if (error) console.error(error);
       else setQuestion(data[0]); // On stocke la première question dans l’état
@@ -28,11 +32,28 @@ export default function Home() {
   }, []);
 
   function handleClick(reponse: any) {
-    if (reponse.est_correcte) {
-      alert("Bonne réponse !");
-    } else {
-      alert("Mauvaise réponse.");
-    }
+    if (!question || afficherExplication) return;
+    const estBonneReponse = reponse.est_correcte;
+    const message = estBonneReponse
+      ? "Bonne réponse !"
+      : "Mauvaise réponse.";
+    const explicationTexte = question.explication || message;
+    setExplication(explicationTexte);
+    setAfficherExplication(true);
+    setTimeout(() => {
+      setAfficherExplication(false);
+      setExplication("");
+      setQuestionIndex((prev) => prev + 1);
+    }, 3000);
+  }
+
+  if (!question) {
+    return (
+      <div className="text-center mt-10">
+        <h2 className="text-2xl font-bold">Quiz terminé !</h2>
+        <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
+      </div>
+    );
   }
 
   return (
@@ -93,6 +114,7 @@ export default function Home() {
                   <Button
                     key={reponse.id}
                     onClick={() => handleClick(reponse)}
+                    disabled={afficherExplication}
                     className="w-full justify-start mt-2"
                     variant="outline"
                   >
@@ -100,6 +122,12 @@ export default function Home() {
                   </Button>
                 ))}
               </CardContent>
+              {afficherExplication && (
+              <Alert className="mt-6 bg-yellow-50 border-yellow-300 text-yellow-800">
+                <AlertTitle>Explication</AlertTitle>
+                <AlertDescription>{explication}</AlertDescription>
+              </Alert>
+              )}
             </div>
           </div>
         </Card>
