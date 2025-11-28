@@ -13,11 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Home() {
-  const [question, setQuestion] = useState<any>(null);
+  const [questions, setQuestions] = useState<any[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [explication, setExplication] = useState("");
   const [afficherExplication, setAfficherExplication] = useState(false);
 
+  const question = questions[questionIndex];
+  
   useEffect(() => {
     async function fetchQuestion() {
       const { data, error } = await supabase
@@ -25,11 +27,15 @@ export default function Home() {
         .select(` id, texte, image_url, image_credit_nom, image_credit_url,explication, reponses:reponse (id,texte,est_correcte)`)
         .order('id', { ascending: true });
       if (error) console.error(error);
-      else setQuestion(data[0]); // On stocke la première question dans l’état
+      else setQuestions(data || []);; // On stocke la première question dans l’état
     }
 
     fetchQuestion();
   }, []);
+
+  function reloadQuestions() {
+    setQuestionIndex(0);
+  }
 
   function handleClick(reponse: any) {
     if (!question || afficherExplication) return;
@@ -47,12 +53,20 @@ export default function Home() {
     }, 3000);
   }
 
-  if (!question) {
+  if (!question && questions.length > 0) {
     return (
-      <div className="text-center mt-10">
-        <h2 className="text-2xl font-bold">Quiz terminé !</h2>
-        <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
-      </div>
+      <Card className="max-w-4xl mx-auto mt-25">
+        <div className="text-center mt-auto">
+          <h2 className="text-2xl font-bold">Quiz terminé !</h2>
+          <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
+          <Button
+            onClick={reloadQuestions}
+            className="mt-6"
+          >
+            Recommencer le quiz
+          </Button>
+        </div>
+      </Card>
     );
   }
 
@@ -106,7 +120,7 @@ export default function Home() {
             {/* Colonne droite : question + réponses */}
             <div className="w-1/2 p-4">
               <CardHeader className="p-0 mb-4">
-                <CardTitle>Question</CardTitle>
+                <CardTitle>Question {questionIndex + 1} sur {questions.length}</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <p className="text-lg font-semibold mb-4">{question.texte}</p>
@@ -147,27 +161,6 @@ export default function Home() {
             </EmptyHeader>
           </Empty>
         </Card>
-
-
-        /*    Seconde proposition du chargement de la page avec des Skeletons
-        <Card className="max-w-4xl mx-auto mt-6">
-          <div className="flex">
-            <div className="w-1/2 p-4">
-              <Skeleton className="h-[285px] w-[400px] rounded" />
-              <Skeleton className="h-[45px] w-[415px] mt-4 text-sm text-muted-foreground" />
-            </div>
-            <div className="w-1/2 p-4">
-              <Skeleton className="h-[20px] w-[65px] p-0 mb-4" />
-              <CardContent className="p-0">
-                <Skeleton className="h-[25px] w-[200px] text-lg font-semibold mb-4" />
-                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
-                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
-                <Skeleton className="h-[34px] w-[415px] mt-4 text-sm text-muted-foreground" />
-              </CardContent>
-            </div>
-          </div>
-        </Card>
-      */
 
       )}
     </div>
