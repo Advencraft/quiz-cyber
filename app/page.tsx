@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress"
 
 export default function Home() {
   const tempsAvantQuestion = 3000;
-  const espaceDébut = 10;
+  const espaceDébut = 5;
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [explication, setExplication] = useState("");
@@ -170,7 +170,7 @@ export default function Home() {
         </Card>
 
       ) : (
-
+        
         <div>
           <Alert className="bg-blue-50 border-blue-300 text-blue-800 max-w-xl mx-auto mt-50">
             <AlertTitle className="text-xl font-semibold">Bienvenue sur CyberQuiz</AlertTitle>
@@ -193,7 +193,6 @@ export default function Home() {
             </Empty>
           </Card>
         </div>
-
       )}
     </div>
   );
