@@ -11,7 +11,7 @@ import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle,} from "@/compo
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress"
-
+  
 export default function Home() {
   const tempsAvantQuestion = 3000;
   const espaceDébut = 5;
@@ -22,6 +22,7 @@ export default function Home() {
   const [boutonProchaineQuestion, setboutonProchaineQuestion] = useState(true);
   const [réponseDonné, setréponseDonné] = useState(-1);
   const [questionProgress, setquestionProgress] = useState(espaceDébut);
+  const [questionRépondue, setquestionRépondue] = useState(false);
 
   const question = questions[questionIndex];
   
@@ -44,6 +45,7 @@ export default function Home() {
     setExplication("");
     setQuestionIndex((prev) => prev + 1);
     setquestionProgress((100-espaceDébut)-((questionIndex) / questions.length) * (100/questions.length - espaceDébut));
+    setquestionRépondue(false);
   }
 
   function reloadQuestion() {
@@ -52,15 +54,18 @@ export default function Home() {
   }
 
   function handleClick(reponse: any) {
+    setquestionRépondue(true);
     if (!question || afficherExplication) return;
     const estBonneReponse = reponse.est_correcte;
     setréponseDonné(reponse.id);
     const message = estBonneReponse
       ? "Bonne réponse !"
       : "Mauvaise réponse.";
-    const explicationTexte = question.explication || message;
-    setExplication(explicationTexte);
-    setAfficherExplication(true);
+    if (estBonneReponse === false){
+      const explicationTexte = question.explication || message;
+      setExplication(explicationTexte);
+      setAfficherExplication(true);
+    }
     if (estBonneReponse) {
       setboutonProchaineQuestion(false);
     }else {
@@ -70,8 +75,8 @@ export default function Home() {
     }
   }
 
-  function classRéponse(reponse: any, afficherExplication: any, id: any) {
-    if (afficherExplication && id === réponseDonné) {
+  function classRéponse(reponse: any, id: any) {
+    if (questionRépondue && id === réponseDonné) {
       if (reponse.est_correcte) return "w-full justify-start mt-2 bg-green-100  border-green-400 text-green-900";
       else                      return "w-full justify-start mt-2 bg-red-100    border-red-400   text-red-900";
     }
@@ -146,8 +151,8 @@ export default function Home() {
                   <Button
                     key={reponse.id}
                     onClick={() => handleClick(reponse)}
-                    disabled={afficherExplication}
-                    className={classRéponse(reponse, afficherExplication, reponse.id)}
+                    disabled={questionRépondue}
+                    className={classRéponse(reponse, reponse.id)}
                     variant="outline"
                   >
                     {reponse.texte}
