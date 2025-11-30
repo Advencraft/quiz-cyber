@@ -13,11 +13,29 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
+import { NavigationMenuLink } from '@radix-ui/react-navigation-menu';
   
 export default function Home() {
+  // --------------------------------------------------------- various variables --------------------------------------------------------- //
+  const [theme, setTheme] = useState('light');
+  const [pages, setPages] = useState('questionnaire');
+
+  // ------------------------------------------------------- various functionality ------------------------------------------------------- //
+  function changeTheme() {
+    if (theme === 'light') return () => setTheme('dark');
+    else if (theme === 'dark') return () => setTheme('light');
+  };
+
+  function changePages(page: string) {
+    if (pages === page) return;
+    if (page === 'questionnaire') reloadQuestion();
+    setPages(page);
+  }
+
+  // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
   const tempsAvantQuestion = 3000;
   const espaceDébut = 5;
-  const [theme, setTheme] = useState('light');
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [explication, setExplication] = useState("");
@@ -26,9 +44,9 @@ export default function Home() {
   const [réponseDonné, setréponseDonné] = useState(-1);
   const [questionProgress, setquestionProgress] = useState(espaceDébut);
   const [questionRépondue, setquestionRépondue] = useState(false);
-
   const question = questions[questionIndex];
   
+  // --------------------------------------------------- Questionnaire functionality ----------------------------------------------------- //
   useEffect(() => {
     async function fetchQuestion() {
       const { data, error } = await supabase
@@ -86,137 +104,141 @@ export default function Home() {
     return "w-full justify-start mt-2";
   }
 
-  if (!question && questions.length > 0) {
-    return (
-      <body className={theme}>
-        <div className="flex space-x-2">
-          <Switch onClick={changeTheme()} />
-          <Label>{theme} Mode</Label>
-        </div>
-        <Card className="max-w-2xl mx-auto mt-75 p-6">
-          <div className="text-center mt-auto">
-            <h2 className="text-2xl font-bold">Quiz terminé !</h2>
-            <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
-            <Button
-              onClick={reloadQuestion}
-              className="mt-6"
-            >
-              Recommencer le quiz
-            </Button>
-          </div>
-        </Card>
-      </body>
-    );
-  }
-
-  function changeTheme() {
-    if (theme === 'light') return () => setTheme('dark');
-    else if (theme === 'dark') return () => setTheme('light');
-  };
-
   return (
     <body className={theme}>
-      <div className="flex space-x-2">
-        <Switch onClick={changeTheme()} />
-        <Label>{theme} Mode</Label>
-      </div>
-      {question ? (
-        <Card className="max-w-4xl mx-auto mt-45">
-          <div className="flex">
-            {/* Colonne gauche : image + crédit */}
-            <div className="w-1/2 p-4">
-              {question.image_url ? (
-                <Image
-                  src={question.image_url}
-                  alt="Illustration de la question"
-                  width={400}
-                  height={300}
-                  className="rounded"
-                />
-              ) : (
-                <div className="w-full h-[300px] bg-gray-100 flex items-center justify-center text-sm text-gray-500 rounded">
-                  Aucune image disponible
-                </div>
-              )}
-              {question.image_credit_nom && question.image_credit_url && (
-                <Alert className="mt-4 text-sm text-muted-foreground">
-                  <AlertDescription>
-                    <span className="inline">
-                      Image :{" "}
-                      <Link
-                        href={question.image_credit_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline underline-offset-2 hover:text-primary"
-                      >
-                        {question.image_credit_nom}
-                      </Link>
-                    </span>
-                  </AlertDescription>
-                </Alert>
-              )}
+      <section id="navigation-section" className="flex justify-between items-center p-4 border-b mb-6 shadow-sm">
+        <NavigationMenu>
+          <NavigationMenuList className="flex-wrap">
+            <NavigationMenuItem className='space-x-3'>
 
-            </div>
-            {/* Colonne droite : question + réponses */}
-            <div className="w-1/2 p-4">
-              <CardHeader className="p-0 mb-4">
-                <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
-                <Progress value={questionProgress} className="w-[90%] mx-auto" />
-              </CardHeader>
-              <CardContent className="p-0">
-                <p className="text-lg font-semibold mb-4">{question.texte}</p>
-                {question.reponses.map((reponse: any) => (
-                  <Button
-                    key={reponse.id}
-                    onClick={() => handleClick(reponse)}
-                    disabled={questionRépondue}
-                    className={classRéponse(reponse, reponse.id)}
-                    variant="outline"
-                  >
-                    {reponse.texte}
-                  </Button>
-                ))}
-              </CardContent>
-              {afficherExplication && (
-              <Alert className="mt-6 bg-yellow-50 border-yellow-300 text-yellow-800">
-                <AlertTitle>Explication</AlertTitle>
-                <AlertDescription>{explication}</AlertDescription>
-              </Alert>
-              )}
-              <div className="text-center mt-6">
-                <Button onClick={ProchaineQuestion} hidden={boutonProchaineQuestion}>
-                  Prochaine question
+              <NavigationMenuLink asChild className={pages === 'questionnaire' ? 'font-bold underline' : ''} onClick={() => changePages('questionnaire')}>
+                <Label className={navigationMenuTriggerStyle()}>
+                questionnaire
+                </Label>
+              </NavigationMenuLink>
+
+              <NavigationMenuLink asChild className={pages === 'classement' ? 'font-bold underline' : ''} onClick={() => changePages('classement')}>
+                <Label className={navigationMenuTriggerStyle()}>
+                classement
+                </Label>
+              </NavigationMenuLink>
+
+              <NavigationMenuLink asChild>
+                <Label htmlFor="theme" className={navigationMenuTriggerStyle()}>
+                  <Switch onClick={changeTheme()} id='theme'/>
+                  {theme} Mode
+                </Label>
+              </NavigationMenuLink>
+
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      </section>
+      { pages === 'questionnaire' ?(
+        <section id="questionnaire-section">
+          { !question && questions.length > 0 ? (
+            <Card className="text-center mt-45 max-w-4xl mx-auto">
+              <div className="text-center mt-auto">
+                <h2 className="text-2xl font-bold">Quiz terminé !</h2>
+                <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
+                <Button
+                  onClick={reloadQuestion}
+                  className="mt-6"
+                >
+                  Recommencer le quiz
                 </Button>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          ) : question ? (
+            <Card className="max-w-4xl mx-auto mt-10">
+              <div className="flex">
+                {/* Colonne gauche : image + crédit */}
+                <div className="w-1/2 p-4">
+                  {question.image_url ? (
+                    <Image
+                      src={question.image_url}
+                      alt="Illustration de la question"
+                      width={400}
+                      height={300}
+                      className="rounded"
+                    />
+                  ) : (
+                    <div className="w-full h-[300px] bg-gray-100 flex items-center justify-center text-sm text-gray-500 rounded">
+                      Aucune image disponible
+                    </div>
+                  )}
+                  {question.image_credit_nom && question.image_credit_url && (
+                    <Alert className="mt-4 text-sm text-muted-foreground">
+                      <AlertDescription>
+                        <span className="inline">
+                          Image :{" "}
+                          <Link
+                            href={question.image_credit_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:text-primary"
+                          >
+                            {question.image_credit_nom}
+                          </Link>
+                        </span>
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
-      ) : (
-        
-        <div>
-          <Alert className="bg-blue-50 border-blue-300 text-blue-800 max-w-xl mx-auto mt-50">
-            <AlertTitle className="text-xl font-semibold">Bienvenue sur CyberQuiz</AlertTitle>
-            <AlertDescription>
-              Préparez-vous à tester vos connaissances !
-            </AlertDescription>
-          </Alert>
+                </div>
+                {/* Colonne droite : question + réponses */}
+                <div className="w-1/2 p-4">
+                  <CardHeader className="p-0 mb-4">
+                    <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
+                    <Progress value={questionProgress} className="w-[90%] mx-auto" />
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <p className="text-lg font-semibold mb-4">{question.texte}</p>
+                    {question.reponses.map((reponse: any) => (
+                      <Button
+                        key={reponse.id}
+                        onClick={() => handleClick(reponse)}
+                        disabled={questionRépondue}
+                        className={classRéponse(reponse, reponse.id)}
+                        variant="outline"
+                      >
+                        {reponse.texte}
+                      </Button>
+                    ))}
+                  </CardContent>
+                  {afficherExplication && (
+                  <Alert className="mt-6 bg-yellow-50 border-yellow-300 text-yellow-800">
+                    <AlertTitle>Explication</AlertTitle>
+                    <AlertDescription>{explication}</AlertDescription>
+                  </Alert>
+                  )}
+                  <div className="text-center mt-6">
+                    <Button onClick={ProchaineQuestion} hidden={boutonProchaineQuestion}>
+                      Prochaine question
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
-          <Card className="max-w-4xl mx-auto mt-6">
-            <Empty className="w-full">
-              <EmptyHeader>
-                <EmptyMedia variant="icon">
-                  <Spinner />
-                </EmptyMedia>
-                <EmptyTitle>Chargement de la question...</EmptyTitle>
-                <EmptyDescription>
-                  Le Chargement peut durer un certain temps.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </Card>
-        </div>
-      )}
+          ) : (
+            
+            <Card className="max-w-4xl mx-auto mt-10">
+              <Empty className="w-full">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <Spinner />
+                  </EmptyMedia>
+                  <EmptyTitle>Chargement de la question...</EmptyTitle>
+                  <EmptyDescription>
+                    Le Chargement peut durer un certain temps.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </Card>
+          )}
+        </section>
+      ):( null )}
     </body>
   );
 }
