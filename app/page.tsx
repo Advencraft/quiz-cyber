@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress"
 export default function Home() {
   const tempsAvantQuestion = 3000;
   const espaceDébut = 5;
+  const [theme, setTheme] = useState('');
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [explication, setExplication] = useState("");
@@ -85,23 +86,25 @@ export default function Home() {
 
   if (!question && questions.length > 0) {
     return (
-      <Card className="max-w-2xl mx-auto mt-75 p-6">
-        <div className="text-center mt-auto">
-          <h2 className="text-2xl font-bold">Quiz terminé !</h2>
-          <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
-          <Button
-            onClick={reloadQuestion}
-            className="mt-6"
-          >
-            Recommencer le quiz
-          </Button>
-        </div>
-      </Card>
+      <body className={theme}>
+        <Card className="max-w-2xl mx-auto mt-75 p-6">
+          <div className="text-center mt-auto">
+            <h2 className="text-2xl font-bold">Quiz terminé !</h2>
+            <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
+            <Button
+              onClick={reloadQuestion}
+              className="mt-6"
+            >
+              Recommencer le quiz
+            </Button>
+          </div>
+        </Card>
+      </body>
     );
   }
 
   return (
-    <div>
+    <body className={theme}>
       {question ? (
         <Card className="max-w-4xl mx-auto mt-45">
           <div className="flex">
@@ -199,6 +202,6 @@ export default function Home() {
           </Card>
         </div>
       )}
-    </div>
+    </body>
   );
 }
