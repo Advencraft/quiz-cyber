@@ -10,12 +10,14 @@ import { Spinner } from "@/components/ui/spinner"
 import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle,} from "@/components/ui/empty"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
   
 export default function Home() {
   const tempsAvantQuestion = 3000;
   const espaceDébut = 5;
-  const [theme, setTheme] = useState('');
+  const [theme, setTheme] = useState('light');
   const [questions, setQuestions] = useState<any[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [explication, setExplication] = useState("");
@@ -87,6 +89,10 @@ export default function Home() {
   if (!question && questions.length > 0) {
     return (
       <body className={theme}>
+        <div className="flex space-x-2">
+          <Switch onClick={changeTheme()} />
+          <Label>{theme} Mode</Label>
+        </div>
         <Card className="max-w-2xl mx-auto mt-75 p-6">
           <div className="text-center mt-auto">
             <h2 className="text-2xl font-bold">Quiz terminé !</h2>
@@ -103,8 +109,17 @@ export default function Home() {
     );
   }
 
+  function changeTheme() {
+    if (theme === 'light') return () => setTheme('dark');
+    else if (theme === 'dark') return () => setTheme('light');
+  };
+
   return (
     <body className={theme}>
+      <div className="flex space-x-2">
+        <Switch onClick={changeTheme()} />
+        <Label>{theme} Mode</Label>
+      </div>
       {question ? (
         <Card className="max-w-4xl mx-auto mt-45">
           <div className="flex">
