@@ -16,11 +16,12 @@ import { Label } from "@/components/ui/label"
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
 import { NavigationMenuLink } from '@radix-ui/react-navigation-menu';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-  
+import { Input } from "@/components/ui/input"
+
 export default function Home() {
   // --------------------------------------------------------- various variables --------------------------------------------------------- //
   const [theme, setTheme] = useState('light');
-  const [pages, setPages] = useState('questionnaire');
+  const [pages, setPages] = useState('login');
 
   // ------------------------------------------------------- various functionality ------------------------------------------------------- //
   function changeTheme() {
@@ -53,11 +54,18 @@ export default function Home() {
       </section>
     );
   }
+  // -------------------------------------------------------- login functionality -------------------------------------------------------- //
+  const [PageUser, setPageUser] = useState('Login');
+
+  // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
+  function LoginOrRegister(param){
+    if (PageUser !== param){
+      setPageUser(param);
+    }
+  }
 
   // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
   const [Classement, setClassement] = useState<any[]>([]);
-  const [ClassementnIndex, setClassementnIndex] = useState(0);
-  const ClassementJoueur = JSON.stringify(Classement[ClassementnIndex]);
 
   // --------------------------------------------------- Questionnaire functionality ----------------------------------------------------- //
   useEffect(() => {
@@ -72,10 +80,6 @@ export default function Home() {
 
     fetchClassement();
   }, []);
-
-  console.log('ClassementJoueur : '+ClassementJoueur);
-  console.log('Classement : '+JSON.stringify(Classement));
-  
 
   // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
   const tempsAvantQuestion = 3000;
@@ -277,7 +281,7 @@ export default function Home() {
               <div className="text-center mt-auto">
                 <h2 className="text-2xl font-bold">Classement des Joueurs</h2>
                 <p className="mt-4 text-muted-foreground">Voici le classement des joueurs :</p>
-                <pre className="mt-6 text-left">
+                <pre className="mt-6 text-left mx-10">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -305,7 +309,43 @@ export default function Home() {
         ) : (
           chargement('classement')
         )
-       ): null }
+      ) : pages === 'login' ?(
+        <section id="login-section">
+            <Card className="max-w-80 mx-auto mt-35">
+              <div className="flex mx-5">
+                <div className="w-1/2">
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')}>Se Connexion</Button>
+                </div>
+                <div className="w-1/2">
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')}>Se renseigner</Button>
+                </div>
+              </div>
+              { PageUser === 'Login' ?(
+                <div className='mx-auto w-[75%]'>
+                  <h2  className="text-center mt-auto">Se Connecter</h2>
+                  <Label className='mt-3' htmlFor="email">Email</Label>
+                  <Input type="email" placeholder="Email" id="email"/>
+                  <Label className='mt-3' htmlFor="password">Mot de passe</Label>
+                  <Input type="password" placeholder="password" id="password"/>
+                  <Button className='mx-auto w-[100%] mt-3'>Connexion</Button>
+                </div>
+              ): PageUser === 'Register' ?(
+                <div className='mx-auto w-[75%]'>
+                  <h2  className="text-center mt-auto">Se renseigner</h2>
+                  <Label className='mt-3' htmlFor="email">Email</Label>
+                  <Input type="email" placeholder="Email" id="email"/>
+                  <Label className='mt-3' htmlFor="password">Mot de passe</Label>
+                  <Input type="password" placeholder="password" id="password"/>
+                  <Label className='mt-3' htmlFor="vpassword">vérification de mot de passe</Label>
+                  <Input type="password" placeholder="password" id="vpassword"/>
+                  <Button className='mx-auto w-[100%] mt-3'>Connexion</Button>
+                </div>
+              ):(null)
+              }
+            </Card>
+        </section>
+
+      ) : null }
     </body>
   );
 }
