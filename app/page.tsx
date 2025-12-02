@@ -155,6 +155,7 @@ export default function Home() {
 
   return (
     <body className={theme}>
+      { pages !== 'login' ?(
       <section id="navigation-section" className="flex justify-between items-center p-4 border-b mb-6 shadow-sm">
         <NavigationMenu>
           <NavigationMenuList className="flex-wrap">
@@ -182,7 +183,7 @@ export default function Home() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-      </section>
+      </section>) : null }
       { pages === 'questionnaire' ?(
         <section id="questionnaire-section">
           { !question && questions.length > 0 ? (
@@ -311,7 +312,7 @@ export default function Home() {
         )
       ) : pages === 'login' ?(
         <section id="login-section">
-            <Card className="max-w-80 mx-auto mt-35">
+            <Card className="max-w-80 mx-auto mt-40">
               <div className="flex mx-5">
                 <div className="w-1/2">
                   <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')}>Se Connexion</Button>
