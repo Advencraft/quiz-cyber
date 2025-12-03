@@ -75,12 +75,12 @@ export default function Home() {
   const [PageUser, setPageUser] = useState('Login');
   const [Joueur, setJoueur] = useState<any[]>([]);
 
-  const login_email = useRef('');
-  const login_MDP = useRef('');
+  const login_email = useRef<any>(null);
+  const login_MDP = useRef<any>(null);
   
-  const Registre_email = useRef('');
-  const Registre_MDP = useRef('');
-  const Registre_Verif_MDP = useRef('');
+  const Registre_email = useRef<any>(null);
+  const Registre_MDP = useRef<any>(null);
+  const Registre_Verif_MDP = useRef<any>(null);
   
 
   // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
@@ -103,21 +103,23 @@ export default function Home() {
     let EMail = login_email.current.value;
     let MDP = await sha256(login_MDP.current.value);
 
-    console.log('Mail: ' + EMail);
+    console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
 
     e.preventDefault();
 
     fetchJoueurExist(EMail).then((data: any) => {
+      setJoueur(data);
+      console.log(data);
       if (data.length === 0){
         console.log('Utilisateur non trouvé');
         return;
       } else if (data[0].MDP_Hash !== MDP){
         console.log('Mot de passe incorrect');
         return;
+      } else {
+        console.log('Connexion réussie');
       }
-      setJoueur(data);
-      console.log(data);
     });
 
   }
@@ -127,14 +129,13 @@ export default function Home() {
     let MDP = await sha256(Registre_MDP.current.value);
     let V_MDP = await sha256(Registre_Verif_MDP.current.value);
 
-    console.log('Mail: ' + EMail);
+    console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
     console.log('V_MDP: ' + MDP);
 
     e.preventDefault();
     
     fetchJoueurExist(EMail).then((data: any) => {
-      console.log(data);
       if (data.length > 0){
         console.log('Utilisateur déjà existant');
         return;
@@ -410,15 +411,14 @@ export default function Home() {
             <Card className="max-w-80 mx-auto mt-40">
               <div className="flex mx-5">
                 <div className="w-1/2">
-                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')}>Se Connecter</Button>
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')} variant={PageUser !== 'Login' ? 'link' : 'secondary'}>Se Connecter</Button>
                 </div>
                 <div className="w-1/2">
-                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')}>s'inscrire</Button>
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')} variant={PageUser !== 'Register' ? 'link' : 'secondary'}>s'inscrire</Button>
                 </div>
               </div>
               { PageUser === 'Login' ?(
                 <form method="post" onSubmit={getLogin} className='mx-auto w-[75%]'>
-                  <h2  className="text-center mt-auto">Se Connecter</h2>
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={login_email}/>
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
@@ -427,7 +427,6 @@ export default function Home() {
                 </form>
               ): PageUser === 'Register' ?(
                 <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
-                  <h2  className="text-center mt-auto">s'inscrire</h2>
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={Registre_email}/>
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
