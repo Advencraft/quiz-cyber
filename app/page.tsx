@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Image from 'next/image';
 import Link from "next/link";
+
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner"
@@ -54,14 +55,108 @@ export default function Home() {
       </section>
     );
   }
+  async function sha256(message: string) {
+    // encode as UTF-8
+    const msgBuffer = new TextEncoder('utf-8').encode(message);
+
+    // hash the message
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+    // convert ArrayBuffer to Array
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+    // convert bytes to hex string
+    const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+    // console.log(hashHex);
+    return hashHex;
+  }
+  
   // -------------------------------------------------------- login functionality -------------------------------------------------------- //
   const [PageUser, setPageUser] = useState('Login');
+  const [Joueur, setJoueur] = useState<any[]>([]);
+
+  const login_email = useRef('');
+  const login_MDP = useRef('');
+  
+  const Registre_email = useRef('');
+  const Registre_MDP = useRef('');
+  const Registre_Verif_MDP = useRef('');
+  
 
   // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
-  function LoginOrRegister(param){
+  function LoginOrRegister(param: string) {
     if (PageUser !== param){
       setPageUser(param);
     }
+  }
+
+  async function fetchJoueurExist(EMail: string) {
+    const { data, error } = await supabase
+      .from('joueur')
+      .select(` id, email, MDP_Hash `)
+      .eq('email', EMail);
+    if (error) console.error(error);
+    else return (data || []);
+  }
+
+  async function getLogin(e: React.FormEvent<HTMLFormElement>) {
+    let EMail = login_email.current.value;
+    let MDP = await sha256(login_MDP.current.value);
+
+    console.log('Mail: ' + EMail);
+    console.log('MDP: ' + MDP);
+
+    e.preventDefault();
+
+    fetchJoueurExist(EMail).then((data: any) => {
+      if (data.length === 0){
+        console.log('Utilisateur non trouvé');
+        return;
+      } else if (data[0].MDP_Hash !== MDP){
+        console.log('Mot de passe incorrect');
+        return;
+      }
+      setJoueur(data);
+      console.log(data);
+    });
+
+  }
+
+  async function getRegistration(e: React.FormEvent<HTMLFormElement>) {
+    let EMail = Registre_email.current.value;
+    let MDP = await sha256(Registre_MDP.current.value);
+    let V_MDP = await sha256(Registre_Verif_MDP.current.value);
+
+    console.log('Mail: ' + EMail);
+    console.log('MDP: ' + MDP);
+    console.log('V_MDP: ' + MDP);
+
+    e.preventDefault();
+    
+    fetchJoueurExist(EMail).then((data: any) => {
+      console.log(data);
+      if (data.length > 0){
+        console.log('Utilisateur déjà existant');
+        return;
+      } else if (MDP !== V_MDP){
+        console.log('Les mots de passe ne correspondent pas');
+        return;
+      } else {
+        supabase
+          .from('joueur')
+          .insert([{ email: EMail, MDP_Hash: MDP }])
+          .then(({ data, error }) => {
+            if (error) {
+              console.error('Erreur lors de l\'inscription:', error);
+            } else {
+              console.log('Inscription réussie:', data);
+            }
+          });
+      }
+      setJoueur(data[0]);
+      console.log(Joueur);
+    });
+
   }
 
   // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
@@ -315,34 +410,33 @@ export default function Home() {
             <Card className="max-w-80 mx-auto mt-40">
               <div className="flex mx-5">
                 <div className="w-1/2">
-                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')}>Se Connexion</Button>
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Login')}>Se Connecter</Button>
                 </div>
                 <div className="w-1/2">
-                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')}>Se renseigner</Button>
+                  <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')}>s'inscrire</Button>
                 </div>
               </div>
               { PageUser === 'Login' ?(
-                <div className='mx-auto w-[75%]'>
+                <form method="post" onSubmit={getLogin} className='mx-auto w-[75%]'>
                   <h2  className="text-center mt-auto">Se Connecter</h2>
                   <Label className='mt-3' htmlFor="email">Email</Label>
-                  <Input type="email" placeholder="Email" id="email"/>
+                  <Input type="email" placeholder="Email" id="email" ref={login_email}/>
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
-                  <Input type="password" placeholder="password" id="password"/>
-                  <Button className='mx-auto w-[100%] mt-3'>Connexion</Button>
-                </div>
+                  <Input type="password" placeholder="password" id="password" ref={login_MDP}/>
+                  <Button className='mx-auto w-[100%] mt-3' type='submit'>Connexion</Button>
+                </form>
               ): PageUser === 'Register' ?(
-                <div className='mx-auto w-[75%]'>
-                  <h2  className="text-center mt-auto">Se renseigner</h2>
+                <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
+                  <h2  className="text-center mt-auto">s'inscrire</h2>
                   <Label className='mt-3' htmlFor="email">Email</Label>
-                  <Input type="email" placeholder="Email" id="email"/>
+                  <Input type="email" placeholder="Email" id="email" ref={Registre_email}/>
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
-                  <Input type="password" placeholder="password" id="password"/>
+                  <Input type="password" placeholder="password" id="password" ref={Registre_MDP}/>
                   <Label className='mt-3' htmlFor="vpassword">vérification de mot de passe</Label>
-                  <Input type="password" placeholder="password" id="vpassword"/>
-                  <Button className='mx-auto w-[100%] mt-3'>Connexion</Button>
-                </div>
-              ):(null)
-              }
+                  <Input type="password" placeholder="verification password" id="vpassword" ref={Registre_Verif_MDP}/>
+                  <Button className='mx-auto w-[100%] mt-3'>s'inscrire</Button>
+                </form>
+              ):(null)}
             </Card>
         </section>
 
