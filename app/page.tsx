@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Image from 'next/image';
 import Link from "next/link";
+import moment from 'moment'
 
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,6 +79,7 @@ export default function Home() {
   const login_email = useRef<any>(null);
   const login_MDP = useRef<any>(null);
   
+  const Registre_Pseudo = useRef<any>(null);
   const Registre_email = useRef<any>(null);
   const Registre_MDP = useRef<any>(null);
   const Registre_Verif_MDP = useRef<any>(null);
@@ -93,10 +95,19 @@ export default function Home() {
   async function fetchJoueurExist(EMail: string) {
     const { data, error } = await supabase
       .from('joueur')
-      .select(` id, email, MDP_Hash `)
+      .select(` id, email, MDP_Hash, pseudo, date_inscription `)
       .eq('email', EMail);
     if (error) console.error(error);
     else return (data || []);
+  }
+
+  function ConnexionReussi(){
+    setPages('profil');
+  }
+  
+  function Déconnexion(){
+    setPages('login');
+    setJoueur([]);
   }
 
   async function getLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -119,12 +130,19 @@ export default function Home() {
         return;
       } else {
         console.log('Connexion réussie');
+        ConnexionReussi();
       }
     });
 
   }
 
   async function getRegistration(e: React.FormEvent<HTMLFormElement>) {
+    // source : 
+    // https://momentjs.com/
+    const the_Date = new Date();
+    const Date_now = moment(the_Date).format('YYYY-MM-DD');
+    // ------------------------------------------------------------------------------
+    let Pseudo = Registre_Pseudo.current.value;
     let EMail = Registre_email.current.value;
     let MDP = await sha256(Registre_MDP.current.value);
     let V_MDP = await sha256(Registre_Verif_MDP.current.value);
@@ -132,6 +150,8 @@ export default function Home() {
     console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
     console.log('V_MDP: ' + MDP);
+    console.log('Pseudo: ' + Pseudo);
+    console.log('Date: ' + Date_now);
 
     e.preventDefault();
     
@@ -145,12 +165,27 @@ export default function Home() {
       } else {
         supabase
           .from('joueur')
-          .insert([{ email: EMail, MDP_Hash: MDP }])
+          .insert([{ pseudo: Pseudo, email: EMail, MDP_Hash: MDP, date_inscription: Date_now}])
           .then(({ data, error }) => {
             if (error) {
               console.error('Erreur lors de l\'inscription:', error);
-            } else {
-              console.log('Inscription réussie:', data);
+              return;
+            } 
+            else {
+              fetchJoueurExist(EMail).then((data: any) => {
+                setJoueur(data);
+                console.log(data);
+                if (data.length === 0){
+                  console.log('Utilisateur non trouvé');
+                  return;
+                } else if (data[0].MDP_Hash !== MDP){
+                  console.log('Mot de passe incorrect');
+                  return;
+                } else {
+                  console.log('Connexion réussie');
+                  ConnexionReussi();
+                }
+              });
             }
           });
       }
@@ -266,6 +301,12 @@ export default function Home() {
               <NavigationMenuLink asChild className={pages === 'classement' ? 'font-bold underline' : ''} onClick={() => changePages('classement')}>
                 <Label className={navigationMenuTriggerStyle()}>
                 classement
+                </Label>
+              </NavigationMenuLink>
+              
+              <NavigationMenuLink asChild className={pages === 'profil' ? 'font-bold underline' : ''} onClick={() => changePages('profil')}>
+                <Label className={navigationMenuTriggerStyle()}>
+                profil
                 </Label>
               </NavigationMenuLink>
 
@@ -406,6 +447,28 @@ export default function Home() {
         ) : (
           chargement('classement')
         )
+      ) : pages === 'profil' ?(
+        <section  id="profil-section">
+          <Card className="max-w-80 mx-auto mt-40">
+            <CardTitle className="mx-auto" >
+              Information sur le compte :
+            </CardTitle>
+            {Joueur.map((entry) => (
+              <div className='mx-auto'>
+                <div className='mt-2'>Id : {entry.id}<br></br></div>
+                <div className='mt-2'>Pseudo : {entry.pseudo}<br></br></div>
+                <div className='mt-2'>Email : {entry.email}<br></br></div>
+                <div className='mt-2'>Date d'inscription : {entry.date_inscription}<br></br></div>
+                <Button
+                  className='mt-2 w-[100%]'
+                  variant={'destructive'} 
+                  onClick={() => Déconnexion()}>
+                  Déconnexion
+                </Button>
+              </div>
+            ))}
+          </Card>
+        </section>
       ) : pages === 'login' ?(
         <section id="login-section">
             <Card className="max-w-80 mx-auto mt-40">
@@ -427,6 +490,11 @@ export default function Home() {
                 </form>
               ): PageUser === 'Register' ?(
                 <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
+                  <Label className='mt-3' htmlFor="pseudo">pseudo</Label>
+                  <Input type="text" placeholder="Pseudo" id="pseudo" ref={Registre_Pseudo}/>
+
+
+
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={Registre_email}/>
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
@@ -438,7 +506,6 @@ export default function Home() {
               ):(null)}
             </Card>
         </section>
-
       ) : null }
     </body>
   );
