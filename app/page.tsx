@@ -24,6 +24,7 @@ export default function Home() {
   // --------------------------------------------------------- various variables --------------------------------------------------------- //
   const [theme, setTheme] = useState('light');
   const [pages, setPages] = useState('login');
+  const [score, setScore] = useState(0);
 
   // ------------------------------------------------------- various functionality ------------------------------------------------------- //
   function changeTheme() {
@@ -294,6 +295,7 @@ export default function Home() {
   }
 
   function reloadQuestion() {
+    setScore(0);
     setQuestionIndex(0);
     setquestionProgress(espaceDébut);
   }
@@ -312,6 +314,7 @@ export default function Home() {
       setAfficherExplication(true);
     }
     if (estBonneReponse) {
+      setScore(score + 1);
       setboutonProchaineQuestion(false);
     }else {
     setTimeout(() => {
@@ -422,6 +425,7 @@ export default function Home() {
                   <CardHeader className="p-0 mb-4">
                     <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
                     <Progress value={questionProgress} className="w-[90%] mx-auto" />
+                    <CardTitle className="" >Score : {score} / {questions.length}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <p className="text-lg font-semibold mb-4">{question.texte}</p>
