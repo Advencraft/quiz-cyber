@@ -85,11 +85,14 @@ export default function Home() {
   const Registre_Verif_MDP = useRef<any>(null);
 
   // Erreur possible :
+  // - false
   // - Erreur lors de l\'inscription:
   // - Utilisateur non trouvé
   // - Utilisateur déjà existant
   // - Mot de passe incorrect
   // - Les mots de passe ne correspondent pas
+  // - Informations manquante
+  // - Pseudo déjà utilisé
   const [Erreur_Formulaire_inscription, setErreur_Formulaire_inscription] = useState<any>('false');
 
   // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
@@ -107,6 +110,15 @@ export default function Home() {
     if (error) console.error(error);
     else return (data || []);
   }
+  
+  async function fetchPseudoExist(Pseudo: string) {
+    const { data, error } = await supabase
+      .from('joueur')
+      .select(` id `)
+      .eq('pseudo', Pseudo);
+    if (error) console.error(error);
+    else return (data || []);
+  }
 
   function ConnexionReussi(){
     setErreur_Formulaire_inscription('false');
@@ -121,6 +133,7 @@ export default function Home() {
   async function getLogin(e: React.FormEvent<HTMLFormElement>) {
     let EMail = login_email.current.value;
     let MDP = await sha256(login_MDP.current.value);
+    setErreur_Formulaire_inscription('false');
 
     console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
@@ -156,6 +169,7 @@ export default function Home() {
     let EMail = Registre_email.current.value;
     let MDP = await sha256(Registre_MDP.current.value);
     let V_MDP = await sha256(Registre_Verif_MDP.current.value);
+    setErreur_Formulaire_inscription('false');
 
     console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
@@ -164,11 +178,26 @@ export default function Home() {
     console.log('Date: ' + Date_now);
 
     e.preventDefault();
+
     
     fetchJoueurExist(EMail).then((data: any) => {
+      fetchPseudoExist(Pseudo).then((data: any) => {
+        if (data.length > 0){
+          console.log('Pseudo déjà utilisé');
+          setErreur_Formulaire_inscription('Pseudo déjà utilisé');
+          return;
+        }
+      });
+      if (Erreur_Formulaire_inscription === 'Pseudo déjà utilisé') {
+        return;
+      }
       if (data.length > 0){
         console.log('Utilisateur déjà existant');
         setErreur_Formulaire_inscription('Utilisateur déjà existant');
+        return;
+      } else if (Pseudo === '' || EMail === '' || Registre_MDP.current.value === '' || Registre_Verif_MDP.current.value === ''){
+        console.log('Informations manquante');
+        setErreur_Formulaire_inscription('Informations  ');
         return;
       } else if (MDP !== V_MDP){
         console.log('Les mots de passe ne correspondent pas');
@@ -496,13 +525,6 @@ export default function Home() {
                 </div>
               </div>
               {
-              // Erreur possible :
-              // - Erreur lors de l\'inscription:
-              // - Utilisateur non trouvé
-              // - Utilisateur déjà existant
-              // - Mot de passe incorrect
-              // - Les mots de passe ne correspondent pas
-
               PageUser === 'Login' ?(
                 <form method="post" onSubmit={getLogin} className='mx-auto w-[75%]'>
                   <Label className='mt-3' htmlFor="email">Email</Label>
@@ -516,8 +538,10 @@ export default function Home() {
                 </form>
               ): PageUser === 'Register' ?(
                 <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
+                  { Erreur_Formulaire_inscription === 'Informations manquante' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Label className='mt-3' htmlFor="pseudo">pseudo</Label>
                   <Input type="text" placeholder="Pseudo" id="pseudo" ref={Registre_Pseudo}/>
+                  { Erreur_Formulaire_inscription === 'Pseudo déjà utilisé' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={Registre_email}/>
                   { Erreur_Formulaire_inscription === 'Utilisateur déjà existant' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
