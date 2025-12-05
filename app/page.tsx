@@ -83,7 +83,14 @@ export default function Home() {
   const Registre_email = useRef<any>(null);
   const Registre_MDP = useRef<any>(null);
   const Registre_Verif_MDP = useRef<any>(null);
-  
+
+  // Erreur possible :
+  // - Erreur lors de l\'inscription:
+  // - Utilisateur non trouvé
+  // - Utilisateur déjà existant
+  // - Mot de passe incorrect
+  // - Les mots de passe ne correspondent pas
+  const [Erreur_Formulaire_inscription, setErreur_Formulaire_inscription] = useState<any>('false');
 
   // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
   function LoginOrRegister(param: string) {
@@ -102,6 +109,7 @@ export default function Home() {
   }
 
   function ConnexionReussi(){
+    setErreur_Formulaire_inscription('false');
     setPages('profil');
   }
   
@@ -124,9 +132,11 @@ export default function Home() {
       console.log(data);
       if (data.length === 0){
         console.log('Utilisateur non trouvé');
+        setErreur_Formulaire_inscription('Utilisateur non trouvé');
         return;
       } else if (data[0].MDP_Hash !== MDP){
         console.log('Mot de passe incorrect');
+        setErreur_Formulaire_inscription('Mot de passe incorrect');
         return;
       } else {
         console.log('Connexion réussie');
@@ -158,9 +168,11 @@ export default function Home() {
     fetchJoueurExist(EMail).then((data: any) => {
       if (data.length > 0){
         console.log('Utilisateur déjà existant');
+        setErreur_Formulaire_inscription('Utilisateur déjà existant');
         return;
       } else if (MDP !== V_MDP){
         console.log('Les mots de passe ne correspondent pas');
+        setErreur_Formulaire_inscription('Les mots de passe ne correspondent pas');
         return;
       } else {
         supabase
@@ -169,6 +181,7 @@ export default function Home() {
           .then(({ data, error }) => {
             if (error) {
               console.error('Erreur lors de l\'inscription:', error);
+              setErreur_Formulaire_inscription('Erreur lors de l\'inscription:');
               return;
             } 
             else {
@@ -177,9 +190,11 @@ export default function Home() {
                 console.log(data);
                 if (data.length === 0){
                   console.log('Utilisateur non trouvé');
+                  setErreur_Formulaire_inscription('Utilisateur non trouvé');
                   return;
                 } else if (data[0].MDP_Hash !== MDP){
                   console.log('Mot de passe incorrect');
+                  setErreur_Formulaire_inscription('Mot de passe incorrect');
                   return;
                 } else {
                   console.log('Connexion réussie');
@@ -480,27 +495,38 @@ export default function Home() {
                   <Button className='w-[100%]' onClick={() => LoginOrRegister('Register')} variant={PageUser !== 'Register' ? 'link' : 'secondary'}>s'inscrire</Button>
                 </div>
               </div>
-              { PageUser === 'Login' ?(
+              {
+              // Erreur possible :
+              // - Erreur lors de l\'inscription:
+              // - Utilisateur non trouvé
+              // - Utilisateur déjà existant
+              // - Mot de passe incorrect
+              // - Les mots de passe ne correspondent pas
+
+              PageUser === 'Login' ?(
                 <form method="post" onSubmit={getLogin} className='mx-auto w-[75%]'>
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={login_email}/>
+                  { Erreur_Formulaire_inscription === 'Utilisateur non trouvé' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
                   <Input type="password" placeholder="password" id="password" ref={login_MDP}/>
+                  { Erreur_Formulaire_inscription === 'Mot de passe incorrect' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
+                  { Erreur_Formulaire_inscription === 'Erreur lors de l\'inscription:' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Button className='mx-auto w-[100%] mt-3' type='submit'>Connexion</Button>
                 </form>
               ): PageUser === 'Register' ?(
                 <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
                   <Label className='mt-3' htmlFor="pseudo">pseudo</Label>
                   <Input type="text" placeholder="Pseudo" id="pseudo" ref={Registre_Pseudo}/>
-
-
-
                   <Label className='mt-3' htmlFor="email">Email</Label>
                   <Input type="email" placeholder="Email" id="email" ref={Registre_email}/>
+                  { Erreur_Formulaire_inscription === 'Utilisateur déjà existant' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Label className='mt-3' htmlFor="password">Mot de passe</Label>
                   <Input type="password" placeholder="password" id="password" ref={Registre_MDP}/>
                   <Label className='mt-3' htmlFor="vpassword">vérification de mot de passe</Label>
                   <Input type="password" placeholder="verification password" id="vpassword" ref={Registre_Verif_MDP}/>
+                  { Erreur_Formulaire_inscription === 'Les mots de passe ne correspondent pas' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
+                  { Erreur_Formulaire_inscription === 'Erreur lors de l\'inscription:' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Button className='mx-auto w-[100%] mt-3'>s'inscrire</Button>
                 </form>
               ):(null)}
