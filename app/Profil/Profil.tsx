@@ -1,24 +1,10 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import Image from 'next/image';
-import Link from "next/link";
-import moment from 'moment'
 
 // Components
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner"
-import {Empty,EmptyDescription,EmptyHeader,EmptyMedia,EmptyTitle,} from "@/components/ui/empty"
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu"
-import { NavigationMenuLink } from '@radix-ui/react-navigation-menu';
-import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
 
 export default function Home() {
   // --------------------------------------------------------- various variables --------------------------------------------------------- //
