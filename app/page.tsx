@@ -105,7 +105,7 @@ export default function Home() {
   async function fetchJoueurExist(EMail: string) {
     const { data, error } = await supabase
       .from('joueur')
-      .select(` id, email, MDP_Hash, pseudo, date_inscription `)
+      .select(` id, email, MDP_Hash, pseudo, date_inscription, Administrateur `)
       .eq('email', EMail);
     if (error) console.error(error);
     else return (data || []);
@@ -328,10 +328,27 @@ export default function Home() {
     return "w-full justify-start mt-2";
   }
 
+  // ------------------------------------------------------ menu admin variables -------------------------------------------------------- //
+  const [sous_menu, setsous_menu] = useState('Statistique');
+
+  // ---------------------------------------------------- menu admin functionality ------------------------------------------------------ //
+
+  function menu_admin( Utilisateur : any ){
+    if ( Utilisateur.Administrateur == true ){
+      return (
+        <NavigationMenuLink asChild className={pages === 'Admin' ? 'font-bold underline' : ''} onClick={() => changePages('Admin')}>
+          <Label className={navigationMenuTriggerStyle()}>
+          Admin
+          </Label>
+        </NavigationMenuLink>
+        );
+      }
+  }
+
   return (
     <body className={theme}>
       { pages !== 'login' ?(
-      <section id="navigation-section" className="flex justify-between items-center p-4 border-b mb-6 shadow-sm">
+      <section id="navigation-section" className="flex justify-between items-center p-4 border-b shadow-sm">
         <NavigationMenu>
           <NavigationMenuList className="flex-wrap">
             <NavigationMenuItem className='space-x-3'>
@@ -353,6 +370,11 @@ export default function Home() {
                 profil
                 </Label>
               </NavigationMenuLink>
+              
+              {Joueur.map((entry) => (
+                menu_admin(entry)
+                ))
+              }
 
               <NavigationMenuLink asChild>
                 <Label htmlFor="theme" className={navigationMenuTriggerStyle()}>
@@ -555,6 +577,27 @@ export default function Home() {
                 </form>
               ):(null)}
             </Card>
+        </section>
+      ) : pages === 'Admin' ?(
+        <section id="Panel-section" className='fixed w-[100%]'>
+          <Card className=' w-[15%] h-screen p-5 rounded-none shadow-none'>
+            <Button className={sous_menu === 'Statistique' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Statistique')}>Statistique</Button> 
+            <Button className={sous_menu === 'Questions' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Questions')}>Éditeur de Questions</Button> 
+            <Button className={sous_menu === 'utilisateur' ? 'font-bold underline' : ''} onClick={() => setsous_menu('utilisateur')}>Gestionnaire d'utilisateur</Button> 
+          </Card>
+          { sous_menu === 'Statistique' ?(
+            <section id='Statistique-section'>
+              Statistique
+            </section>
+          ) : sous_menu === 'Questions' ?(
+            <section id='Questions-section'>
+              Questions
+            </section>
+          ) : sous_menu === 'utilisateur' ?( 
+            <section id='utilisateur-section'>
+              utilisateur
+            </section>
+          ) : null }
         </section>
       ) : null }
     </body>
