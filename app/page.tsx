@@ -330,8 +330,21 @@ export default function Home() {
 
   // ------------------------------------------------------ menu admin variables -------------------------------------------------------- //
   const [sous_menu, setsous_menu] = useState('Statistique');
+  const [joueurs, setjoueurs] = useState<any[]>([]);
 
   // ---------------------------------------------------- menu admin functionality ------------------------------------------------------ //
+  useEffect(() => {
+    async function fetchListUser() {
+      const { data, error } = await supabase
+        .from('joueur')
+        .select(` id, email, MDP_Hash, pseudo, date_inscription, Administrateur `)
+        .order('id', { ascending: true });
+      if (error) console.error(error);
+      else setjoueurs(data || []);
+    }
+
+    fetchListUser();
+  }, []);
 
   function menu_admin( Utilisateur : any ){
     if ( Utilisateur.Administrateur == true ){
@@ -579,26 +592,57 @@ export default function Home() {
             </Card>
         </section>
       ) : pages === 'Admin' ?(
-        <section id="Panel-section" className='fixed w-[100%]'>
-          <Card className=' w-[15%] h-screen p-5 rounded-none shadow-none'>
-            <Button className={sous_menu === 'Statistique' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Statistique')}>Statistique</Button> 
-            <Button className={sous_menu === 'Questions' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Questions')}>Éditeur de Questions</Button> 
-            <Button className={sous_menu === 'utilisateur' ? 'font-bold underline' : ''} onClick={() => setsous_menu('utilisateur')}>Gestionnaire d'utilisateur</Button> 
-          </Card>
-          { sous_menu === 'Statistique' ?(
-            <section id='Statistique-section'>
-              Statistique
-            </section>
-          ) : sous_menu === 'Questions' ?(
-            <section id='Questions-section'>
-              Questions
-            </section>
-          ) : sous_menu === 'utilisateur' ?( 
-            <section id='utilisateur-section'>
-              utilisateur
-            </section>
-          ) : null }
-        </section>
+          <section id='admin-section' >
+            <div id="Admin-menu-section" className='fixed w-[15%]'>
+              <Card className='h-screen p-5 rounded-none shadow-none'>
+                <Button className={sous_menu === 'Statistique' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Statistique')}>Statistique</Button> 
+                <Button className={sous_menu === 'Questions' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Questions')}>Éditeur de Questions</Button> 
+                <Button className={sous_menu === 'utilisateur' ? 'font-bold underline' : ''} onClick={() => setsous_menu('utilisateur')}>Gestionnaire d'utilisateur</Button> 
+              </Card>
+            </div>
+            <div id='Admin-panel-section' className='fixed w-[85%] h-screen ml-[15%]'>
+              <Card className="max-w-160 mx-auto p-5 mt-[1%]">
+                <h1><b>{sous_menu} :</b></h1>
+                { sous_menu === 'Statistique' ?(
+                  <section id='Statistique-section'>
+                  </section>
+                ) : sous_menu === 'Questions' ?(
+                  <section id='Questions-section'>
+                  </section>
+                ) : sous_menu === 'utilisateur' ?(
+                  joueurs ?(
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">ID</TableHead>
+                          <TableHead className="w-[100px]">pseudo</TableHead>
+                          <TableHead className="w-[100px]">email</TableHead>
+                          <TableHead className="w-[100px]">MDP_Hash</TableHead>
+                          <TableHead className="w-[100px]">date_inscription</TableHead>
+                          <TableHead className="w-[100px]">Administrateur</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {joueurs.map((list_joueur) => (
+                        <TableRow key={list_joueur.id}>
+                          <TableCell >{list_joueur.classements_joueurs.id}</TableCell >
+                          <TableCell >{list_joueur.classements_joueurs.pseudo}</TableCell >
+                          <TableCell >{list_joueur.classements_joueurs.email}</TableCell >
+                          <TableCell >{list_joueur.classements_joueurs.MDP_Hash}</TableCell >
+                          <TableCell >{list_joueur.classements_joueurs.date_inscription}</TableCell >
+                          <TableCell >{list_joueur.classements_joueurs.Administrateur}</TableCell >
+                        </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    chargement('classement')
+                  )
+
+                ) : null }
+              </Card>
+            </div>
+          </section>
       ) : null }
     </body>
   );
