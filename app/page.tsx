@@ -19,6 +19,7 @@ import { NavigationMenu, NavigationMenuList, NavigationMenuItem, navigationMenuT
 import { NavigationMenuLink } from '@radix-ui/react-navigation-menu';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 export default function Home() {
   // --------------------------------------------------------- various variables --------------------------------------------------------- //
@@ -99,6 +100,7 @@ export default function Home() {
   function LoginOrRegister(param: string) {
     if (PageUser !== param){
       setPageUser(param);
+      setErreur_Formulaire_inscription('false');
     }
   }
 
@@ -159,7 +161,7 @@ export default function Home() {
 
   }
 
-  async function getRegistration(e: React.FormEvent<HTMLFormElement>) {
+  async function getRegistrationUser(e: React.FormEvent<HTMLFormElement>) {
     // source : 
     // https://momentjs.com/
     const the_Date = new Date();
@@ -197,7 +199,7 @@ export default function Home() {
         return;
       } else if (Pseudo === '' || EMail === '' || Registre_MDP.current.value === '' || Registre_Verif_MDP.current.value === ''){
         console.log('Informations manquante');
-        setErreur_Formulaire_inscription('Informations  ');
+        setErreur_Formulaire_inscription('Informations manquante');
         return;
       } else if (MDP !== V_MDP){
         console.log('Les mots de passe ne correspondent pas');
@@ -331,6 +333,16 @@ export default function Home() {
   // ------------------------------------------------------ menu admin variables -------------------------------------------------------- //
   const [sous_menu, setsous_menu] = useState('Statistique');
   const [joueurs, setjoueurs] = useState<any[]>([]);
+  
+  const Question_name = useRef<any>(null);
+  const Question_proposition1 = useRef<any>(null);
+  const Question_proposition2 = useRef<any>(null);
+  const Question_proposition3 = useRef<any>(null);
+  const Question_correct = useRef<any>(null);
+  const Question_niveau = useRef<any>(null);
+  const Question_credit_nom = useRef<any>(null);
+  const Question_credit_url = useRef<any>(null);
+  const Question_explication = useRef<any>(null);
 
   // ---------------------------------------------------- menu admin functionality ------------------------------------------------------ //
   useEffect(() => {
@@ -357,6 +369,21 @@ export default function Home() {
         );
       }
   }
+
+  async function getRegistrationQuestion(e: React.FormEvent<HTMLFormElement>) {
+    let question = Question_name.current.value;
+    let prop1 = Question_proposition1.current.value;
+    let prop2 = Question_proposition2.current.value;
+    let prop3 = Question_proposition3.current.value;
+    let correct = Question_correct.current.value;
+    let niveau = Question_niveau.current.value;
+    let credit_nom = Question_credit_nom.current.value;
+    let credit_url = Question_credit_url.current.value;
+    let explication = Question_explication.current.value;
+
+    e.preventDefault();
+  }
+
 
   return (
     <body className={theme}>
@@ -572,7 +599,7 @@ export default function Home() {
                   <Button className='mx-auto w-[100%] mt-3' type='submit'>Connexion</Button>
                 </form>
               ): PageUser === 'Register' ?(
-                <form method="post" onSubmit={getRegistration} className='mx-auto w-[75%]'>
+                <form method="post" onSubmit={getRegistrationUser} className='mx-auto w-[75%]'>
                   { Erreur_Formulaire_inscription === 'Informations manquante' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Label className='mt-3' htmlFor="pseudo">pseudo</Label>
                   <Input type="text" placeholder="Pseudo" id="pseudo" ref={Registre_Pseudo}/>
@@ -585,6 +612,7 @@ export default function Home() {
                   <Label className='mt-3' htmlFor="vpassword">vérification de mot de passe</Label>
                   <Input type="password" placeholder="verification password" id="vpassword" ref={Registre_Verif_MDP}/>
                   { Erreur_Formulaire_inscription === 'Les mots de passe ne correspondent pas' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
+                  { Erreur_Formulaire_inscription === 'Mot de passe incorrect' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   { Erreur_Formulaire_inscription === 'Erreur lors de l\'inscription:' ? (<Alert className="mt-1 bg-red-50 border-red-300 text-red-800"><AlertDescription>{Erreur_Formulaire_inscription}</AlertDescription></Alert>) : null}
                   <Button className='mx-auto w-[100%] mt-3'>s'inscrire</Button>
                 </form>
@@ -601,36 +629,57 @@ export default function Home() {
               </Card>
             </div>
             <div id='Admin-panel-section' className='fixed w-[85%] h-screen ml-[15%]'>
-              <Card className="max-w-160 mx-auto p-5 mt-[1%]">
+              <Card className="max-w-auto w-[90%] mx-auto p-5 mt-[1%]">
                 <h1><b>{sous_menu} :</b></h1>
                 { sous_menu === 'Statistique' ?(
                   <section id='Statistique-section'>
                   </section>
                 ) : sous_menu === 'Questions' ?(
                   <section id='Questions-section'>
+                    <form method="post" onSubmit={getRegistrationQuestion}>
+                      <Label className='mt-3 pb-2' htmlFor="Question_name">Question :</Label>
+                      <Input type="text" placeholder="Question posé" id="Question_name" ref={Question_name}/>
+
+                      <Label className='mt-3 pb-2' htmlFor="Question_proposition1">Proposition n°1 :</Label>
+                      <Input type="text" placeholder="Choix possible n°1" id="Question_proposition1" ref={Question_proposition1}/>
+                      
+                      <Label className='mt-3 pb-2' htmlFor="Question_proposition2">Proposition n°2 :</Label>
+                      <Input type="text" placeholder="Choix possible n°2" id="Question_proposition2" ref={Question_proposition2}/>
+                      
+                      <Label className='mt-3 pb-2' htmlFor="Question_proposition3">Proposition n°3 :</Label>
+                      <Input type="text" placeholder="Choix possible n°3" id="Question_proposition3" ref={Question_proposition3}/>
+                      
+                      <Label className='mt-3 pb-2' htmlFor="Question_correct">N° de la proposition correct :</Label>
+                      <Input type="number" min="1" max="3" placeholder="Rentrer le numero de la proposition rentrer précédemment étant correct" id="Question_correct" ref={Question_correct}/>
+                    
+                      <Label className='mt-3 pb-2' htmlFor="Question_explication">Explication de la Réponse :</Label>
+                      <Textarea placeholder="Réponse explicative" id="Question_explication" ref={Question_explication}/>
+
+                      <Button className='mx-auto w-[100%] mt-3' type='submit'>Enregistrement de la question</Button>
+                    </form>
                   </section>
                 ) : sous_menu === 'utilisateur' ?(
                   joueurs ?(
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-[100px]">ID</TableHead>
-                          <TableHead className="w-[100px]">pseudo</TableHead>
-                          <TableHead className="w-[100px]">email</TableHead>
-                          <TableHead className="w-[100px]">MDP_Hash</TableHead>
-                          <TableHead className="w-[100px]">date_inscription</TableHead>
-                          <TableHead className="w-[100px]">Administrateur</TableHead>
+                          <TableHead className='w-[0%]'>ID</TableHead>
+                          <TableHead className='w-[0%]'>pseudo</TableHead>
+                          <TableHead className='w-[0%]'>email</TableHead>
+                          <TableHead className='w-[0%]'>MDP_Hash</TableHead>
+                          <TableHead className='w-[0%]'>date_inscription</TableHead>
+                          <TableHead className='w-[0%]'>Administrateur</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {joueurs.map((list_joueur) => (
                         <TableRow key={list_joueur.id}>
-                          <TableCell >{list_joueur.classements_joueurs.id}</TableCell >
-                          <TableCell >{list_joueur.classements_joueurs.pseudo}</TableCell >
-                          <TableCell >{list_joueur.classements_joueurs.email}</TableCell >
-                          <TableCell >{list_joueur.classements_joueurs.MDP_Hash}</TableCell >
-                          <TableCell >{list_joueur.classements_joueurs.date_inscription}</TableCell >
-                          <TableCell >{list_joueur.classements_joueurs.Administrateur}</TableCell >
+                          <TableCell >{list_joueur.id}</TableCell >
+                          <TableCell >{list_joueur.pseudo}</TableCell >
+                          <TableCell >{list_joueur.email}</TableCell >
+                          <TableCell >{list_joueur.MDP_Hash}</TableCell >
+                          <TableCell >{list_joueur.date_inscription}</TableCell >
+                          <TableCell >{list_joueur.Administrateur == true ?('True'):('Flase')}</TableCell >
                         </TableRow>
                         ))}
                       </TableBody>
