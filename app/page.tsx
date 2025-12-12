@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef  } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import Image from 'next/image';
 import Link from "next/link";
@@ -270,6 +270,10 @@ export default function Home() {
   const [questionProgress, setquestionProgress] = useState(espaceDébut);
   const [questionRépondue, setquestionRépondue] = useState(false);
   const question = questions[questionIndex];
+
+  const [EtatQuestionnaire, setEtatQuestionnaire] = useState('stop');
+  const [Score, setScore] = useState(0);
+  const [TimeQuestion, setTimeQuestion] = useState(0);
   
   // --------------------------------------------------- Questionnaire functionality ----------------------------------------------------- //
   useEffect(() => {
@@ -298,6 +302,13 @@ export default function Home() {
   function reloadQuestion() {
     setQuestionIndex(0);
     setquestionProgress(espaceDébut);
+    setEtatQuestionnaire('stop');
+    setScore(0);
+    setTimeQuestion(0);
+  }
+
+  function startQuiz() {
+    setEtatQuestionnaire('encour');
   }
 
   function handleClick(reponse: any) {
@@ -308,7 +319,10 @@ export default function Home() {
     const message = estBonneReponse
       ? "Bonne réponse !"
       : "Mauvaise réponse.";
-    if (estBonneReponse === false){
+    if (estBonneReponse){
+      setScore((prev) => prev + 1);
+    }
+    else {
       const explicationTexte = question.explication || message;
       setExplication(explicationTexte);
       setAfficherExplication(true);
@@ -316,9 +330,9 @@ export default function Home() {
     if (estBonneReponse) {
       setboutonProchaineQuestion(false);
     }else {
-    setTimeout(() => {
-      setboutonProchaineQuestion(false);
-    }, tempsAvantQuestion);
+      setTimeout(() => {
+        setboutonProchaineQuestion(false);
+      }, tempsAvantQuestion);
     }
   }
 
@@ -357,18 +371,6 @@ export default function Home() {
 
     fetchListUser();
   }, []);
-
-  function menu_admin( Utilisateur : any ){
-    if ( Utilisateur.Administrateur == true ){
-      return (
-        <NavigationMenuLink asChild className={pages === 'Admin' ? 'font-bold underline' : ''} onClick={() => changePages('Admin')}>
-          <Label className={navigationMenuTriggerStyle()}>
-          Admin
-          </Label>
-        </NavigationMenuLink>
-        );
-      }
-  }
 
   async function getRegistrationQuestion(e: React.FormEvent<HTMLFormElement>) {
     let question = Question_name.current.value;
@@ -412,7 +414,13 @@ export default function Home() {
               </NavigationMenuLink>
               
               {Joueur.map((entry) => (
-                menu_admin(entry)
+                <NavigationMenuLink asChild className={pages === 'Admin' ? 'font-bold underline' : ''} onClick={() => changePages('Admin')}>
+                  {entry.Administrateur == true ?(
+                    <Label className={navigationMenuTriggerStyle()}>
+                    Admin
+                    </Label>
+                  ):null}
+                  </NavigationMenuLink>
                 ))
               }
 
@@ -429,7 +437,20 @@ export default function Home() {
       </section>) : null }
       { pages === 'questionnaire' ?(
         <section id="questionnaire-section">
-          { !question && questions.length > 0 ? (
+          { EtatQuestionnaire == 'stop' ? (
+            <Card className="text-center mt-45 max-w-4xl mx-auto">
+              <div className="text-center mt-auto">
+                <h2 className="text-2xl font-bold">Bienvenue sur CyberQuiz !</h2>
+                <p className="mt-4 text-muted-foreground">Préparez-vous à tester vos connaissances !</p>
+                <Button
+                  onClick={startQuiz}
+                  className="mt-6"
+                >
+                  Commencé le Quiz ?
+                </Button>
+              </div>
+            </Card>
+          ) : !question && questions.length > 0 ? (
             <Card className="text-center mt-45 max-w-4xl mx-auto">
               <div className="text-center mt-auto">
                 <h2 className="text-2xl font-bold">Quiz terminé !</h2>
@@ -482,7 +503,7 @@ export default function Home() {
                 {/* Colonne droite : question + réponses */}
                 <div className="w-1/2 p-4">
                   <CardHeader className="p-0 mb-4">
-                    <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
+                    <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length} {Score} / {questions.length}</CardTitle>
                     <Progress value={questionProgress} className="w-[90%] mx-auto" />
                   </CardHeader>
                   <CardContent className="p-0">
