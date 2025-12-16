@@ -59,7 +59,7 @@ export default function Home() {
   }
   async function sha256(message: string) {
     // encode as UTF-8
-    const msgBuffer = new TextEncoder('utf-8').encode(message);
+    const msgBuffer = new TextEncoder().encode(message);
 
     // hash the message
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -502,7 +502,7 @@ export default function Home() {
                 </div>
                 {/* Colonne droite : question + réponses */}
                 <div className="w-1/2 p-4">
-                  <CardHeader className="p-0 mb-4">
+                  <CardHeader className="p-0 mb-6">
                     <div className="flex">
                       <CardTitle className="text-right mx-auto w-1/2" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
                       <CardTitle className="text-left mx-auto w-1/2 m-0 w-[15%]" >{Score} / {questions.length}</CardTitle>
