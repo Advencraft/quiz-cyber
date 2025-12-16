@@ -503,7 +503,10 @@ export default function Home() {
                 {/* Colonne droite : question + réponses */}
                 <div className="w-1/2 p-4">
                   <CardHeader className="p-0 mb-4">
-                    <CardTitle className="mx-auto" >Question {questionIndex + 1} sur {questions.length} {Score} / {questions.length}</CardTitle>
+                    <div className="flex">
+                      <CardTitle className="text-right mx-auto w-1/2" >Question {questionIndex + 1} sur {questions.length}</CardTitle>
+                      <CardTitle className="text-left mx-auto w-1/2 m-0 w-[15%]" >{Score} / {questions.length}</CardTitle>
+                    </div>
                     <Progress value={questionProgress} className="w-[90%] mx-auto" />
                   </CardHeader>
                   <CardContent className="p-0">
