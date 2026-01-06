@@ -34,7 +34,7 @@ export default function Home() {
 
   function changePages(page: string) {
     if (pages === page) return;
-    if (page === 'questionnaire') reloadQuestion();
+    if (page === 'questionnaire') loadQuestion();
     setPages(page);
   }
 
@@ -299,16 +299,22 @@ export default function Home() {
     setquestionRépondue(false);
   }
 
-  function reloadQuestion() {
+  function loadQuestion() {
     setQuestionIndex(0);
     setquestionProgress(espaceDébut);
-    setEtatQuestionnaire('stop');
     setScore(0);
     setTimeQuestion(0);
+    setEtatQuestionnaire('stop');
   }
 
-  function startQuiz() {
+  function startQuestionnaire(){
     setEtatQuestionnaire('encour');
+    setTimeQuestion(Date.now());
+  }
+
+  function reloadQuestionnaire(){
+    loadQuestion();
+    startQuestionnaire();
   }
 
   function handleClick(reponse: any) {
@@ -333,6 +339,9 @@ export default function Home() {
       setTimeout(() => {
         setboutonProchaineQuestion(false);
       }, tempsAvantQuestion);
+    }
+    if (questions.length == questionIndex+1){
+      setTimeQuestion(Math.floor((Date.now() - TimeQuestion) / 1000))
     }
   }
 
@@ -443,7 +452,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold">Bienvenue sur CyberQuiz !</h2>
                 <p className="mt-4 text-muted-foreground">Préparez-vous à tester vos connaissances !</p>
                 <Button
-                  onClick={startQuiz}
+                  onClick={startQuestionnaire}
                   className="mt-6"
                 >
                   Commencé le Quiz ?
@@ -456,7 +465,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold">Quiz terminé !</h2>
                 <p className="mt-4 text-muted-foreground">Merci d’avoir participé.</p>
                 <Button
-                  onClick={reloadQuestion}
+                  onClick={reloadQuestionnaire}
                   className="mt-6"
                 >
                   Recommencer le quiz
