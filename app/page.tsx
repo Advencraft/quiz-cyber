@@ -248,8 +248,8 @@ export default function Home() {
   useEffect(() => {
     async function fetchClassement() {
       const { data, error } = await supabase
-        .from('classement_joueur')
-        .select(` id, classements:classement (id, date_partie, score, temps), classements_joueurs:joueur (id, pseudo)`)
+        .from('classement')
+        .select(` id, date_partie, score, temps, id_joueur, classements_joueurs:joueur (id, pseudo)`)
         .order('id', { ascending: true });
       if (error) console.error(error);
       else setClassement(data || []);;
@@ -572,9 +572,9 @@ export default function Home() {
                       {Classement.map((entry) => (
                         <TableRow key={entry.id}>
                           <TableCell >{entry.classements_joueurs.pseudo}</TableCell >
-                          <TableCell >{entry.classements.score}</TableCell >
-                          <TableCell >{entry.classements.temps}</TableCell >
-                          <TableCell >{new Date(entry.classements.date_partie).toLocaleDateString()}</TableCell >
+                          <TableCell >{entry.score}</TableCell >
+                          <TableCell >{entry.temps}</TableCell >
+                          <TableCell >{new Date(entry.date_partie).toLocaleDateString()}</TableCell >
                         </TableRow>
                       ))}
                     </TableBody>
