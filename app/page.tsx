@@ -35,6 +35,7 @@ export default function Home() {
   function changePages(page: string) {
     if (pages === page) return;
     if (page === 'questionnaire') loadQuestion();
+    else if (page === 'classement') rafraichir_classement();
     setPages(page);
   }
 
@@ -245,18 +246,6 @@ export default function Home() {
   const [Classement, setClassement] = useState<any[]>([]);
 
   // ----------------------------------------------------- classement  functionality ----------------------------------------------------- //
-  useEffect(() => {
-    async function fetchClassement() {
-      const { data, error } = await supabase
-        .from('classement')
-        .select(` id, date_partie, score, temps, id_joueur, classements_joueurs:joueur (id, pseudo)`)
-        .order('id', { ascending: true });
-      if (error) console.error(error);
-      else setClassement(data || []);;
-    }
-
-    fetchClassement();
-  }, []);
 
   function select_classement_by_id_joueur(id_joueur: number) {
     supabase
@@ -266,6 +255,7 @@ export default function Home() {
       .then(({ data, error }) => {
         if (error) console.error(error);
         else {
+          rafraichir_classement();
           if (data.length === 0){
             console.log('Premier score !');
             insertClassement(Score, Math.floor((Date.now() - TimeQuestion) / 1000));
@@ -282,7 +272,8 @@ export default function Home() {
     supabase
       .from('classement')
       .select(` id, date_partie, score, temps, id_joueur, classements_joueurs:joueur (id, pseudo)`)
-      .order('id', { ascending: true })
+      .order('score', { ascending: false })
+      .order('temps', { ascending: true })
       .then(({ data, error }) => {
         if (error) console.error(error);
         else setClassement(data || []);;
@@ -296,10 +287,7 @@ export default function Home() {
       .insert([{ id_joueur: Joueur[0].id, score: score, temps: temps, date_partie: moment(new Date()).format('YYYY-MM-DD')}])
       .then(({ data, error }) => {
         if (error) console.error('Erreur lors de l\'insertion du classement:', error);
-        else {
-          // Recharger le classement après l'insertion
-          rafraichir_classement();
-      }});
+      });
   }
 
   function UpdateClassement(id_joueur: number, score: number, temps: number) {
@@ -310,10 +298,7 @@ export default function Home() {
       .eq('id_joueur', id_joueur)
       .then(({ error }) => {
         if (error) console.error('Erreur lors de l\'insertion du classement:', error);
-        else {
-          // Recharger le classement après l'Update
-          rafraichir_classement();
-      }});
+      });
   }
 
   function EnregistrerScore() {
@@ -469,19 +454,19 @@ export default function Home() {
 
               <NavigationMenuLink asChild className={pages === 'questionnaire' ? 'font-bold underline' : ''} onClick={() => changePages('questionnaire')}>
                 <Label className={navigationMenuTriggerStyle()}>
-                questionnaire
+                Questionnaire
                 </Label>
               </NavigationMenuLink>
 
               <NavigationMenuLink asChild className={pages === 'classement' ? 'font-bold underline' : ''} onClick={() => changePages('classement')}>
                 <Label className={navigationMenuTriggerStyle()}>
-                classement
+                Classement
                 </Label>
               </NavigationMenuLink>
               
               <NavigationMenuLink asChild className={pages === 'profil' ? 'font-bold underline' : ''} onClick={() => changePages('profil')}>
                 <Label className={navigationMenuTriggerStyle()}>
-                profil
+                Profil
                 </Label>
               </NavigationMenuLink>
               
