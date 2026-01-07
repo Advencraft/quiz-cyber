@@ -241,10 +241,10 @@ export default function Home() {
 
   }
 
-  // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
+  // ------------------------------------------------------- classement  variables ------------------------------------------------------- //
   const [Classement, setClassement] = useState<any[]>([]);
 
-  // --------------------------------------------------- Questionnaire functionality ----------------------------------------------------- //
+  // ----------------------------------------------------- classement  functionality ----------------------------------------------------- //
   useEffect(() => {
     async function fetchClassement() {
       const { data, error } = await supabase
@@ -257,6 +257,70 @@ export default function Home() {
 
     fetchClassement();
   }, []);
+
+  function select_classement_by_id_joueur(id_joueur: number) {
+    supabase
+      .from('classement')
+      .select('score')
+      .eq('id_joueur', id_joueur)
+      .then(({ data, error }) => {
+        if (error) console.error(error);
+        else {
+          if (data.length === 0){
+            console.log('Premier score !');
+            insertClassement(Score, Math.floor((Date.now() - TimeQuestion) / 1000));
+          }
+          else if (Score > data[0].score ){
+            console.log('Nouveau record !');
+            UpdateClassement(id_joueur, Score, Math.floor((Date.now() - TimeQuestion) / 1000));
+          }
+        };
+      });
+    }
+
+  function rafraichir_classement() {
+    supabase
+      .from('classement')
+      .select(` id, date_partie, score, temps, id_joueur, classements_joueurs:joueur (id, pseudo)`)
+      .order('id', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) console.error(error);
+        else setClassement(data || []);;
+      });
+  }
+
+  function insertClassement(score: number, temps: number) {
+    // Insérer le classement du joueur dans la base de données
+    supabase
+      .from('classement')
+      .insert([{ id_joueur: Joueur[0].id, score: score, temps: temps, date_partie: moment(new Date()).format('YYYY-MM-DD')}])
+      .then(({ data, error }) => {
+        if (error) console.error('Erreur lors de l\'insertion du classement:', error);
+        else {
+          // Recharger le classement après l'insertion
+          rafraichir_classement();
+      }});
+  }
+
+  function UpdateClassement(id_joueur: number, score: number, temps: number) {
+    // Update le classement du joueur dans la base de données
+    supabase
+      .from('classement')
+      .update([{ score: score, temps: temps, date_partie: moment(new Date()).format('YYYY-MM-DD')}])
+      .eq('id_joueur', id_joueur)
+      .then(({ error }) => {
+        if (error) console.error('Erreur lors de l\'insertion du classement:', error);
+        else {
+          // Recharger le classement après l'Update
+          rafraichir_classement();
+      }});
+  }
+
+  function EnregistrerScore() {
+    if (questions.length == questionIndex+1){
+      select_classement_by_id_joueur(Joueur[0].id);
+    }
+  }
 
   // ------------------------------------------------------ Questionnaire variables ------------------------------------------------------ //
   const tempsAvantQuestion = 3000;
@@ -297,6 +361,8 @@ export default function Home() {
     setQuestionIndex((prev) => prev + 1);
     setquestionProgress((100-espaceDébut)-((questionIndex) / questions.length) * (100/questions.length - espaceDébut));
     setquestionRépondue(false);
+
+    EnregistrerScore();
   }
 
   function loadQuestion() {
@@ -339,9 +405,6 @@ export default function Home() {
       setTimeout(() => {
         setboutonProchaineQuestion(false);
       }, tempsAvantQuestion);
-    }
-    if (questions.length == questionIndex+1){
-      setTimeQuestion(Math.floor((Date.now() - TimeQuestion) / 1000))
     }
   }
 
