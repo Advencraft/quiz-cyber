@@ -447,51 +447,51 @@ export default function Home() {
   return (
     <body className={theme}>
       { pages !== 'login' ?(
-      <section id="navigation-section" className="flex justify-between items-center p-4 border-b shadow-sm">
-        <NavigationMenu>
-          <NavigationMenuList className="flex-wrap">
-            <NavigationMenuItem className='space-x-3'>
+        <section id="navigation-section" className="flex justify-between items-center p-4 border-b shadow-sm">
+          <NavigationMenu>
+            <NavigationMenuList className="flex-wrap">
+              <NavigationMenuItem className='space-x-3'>
 
-              <NavigationMenuLink asChild className={pages === 'questionnaire' ? 'font-bold underline' : ''} onClick={() => changePages('questionnaire')}>
-                <Label className={navigationMenuTriggerStyle()}>
-                Questionnaire
-                </Label>
-              </NavigationMenuLink>
+                <NavigationMenuLink asChild className={pages === 'questionnaire' ? 'font-bold underline' : ''} onClick={() => changePages('questionnaire')}>
+                  <Label className={navigationMenuTriggerStyle()}>
+                  Questionnaire
+                  </Label>
+                </NavigationMenuLink>
 
-              <NavigationMenuLink asChild className={pages === 'classement' ? 'font-bold underline' : ''} onClick={() => changePages('classement')}>
-                <Label className={navigationMenuTriggerStyle()}>
-                Classement
-                </Label>
-              </NavigationMenuLink>
-              
-              <NavigationMenuLink asChild className={pages === 'profil' ? 'font-bold underline' : ''} onClick={() => changePages('profil')}>
-                <Label className={navigationMenuTriggerStyle()}>
-                Profil
-                </Label>
-              </NavigationMenuLink>
-              
-              {Joueur.map((entry) => (
-                <NavigationMenuLink asChild className={pages === 'Admin' ? 'font-bold underline' : ''} onClick={() => changePages('Admin')}>
-                  {entry.Administrateur == true ?(
-                    <Label className={navigationMenuTriggerStyle()}>
-                    Admin
-                    </Label>
-                  ):null}
-                  </NavigationMenuLink>
-                ))
-              }
+                <NavigationMenuLink asChild className={pages === 'classement' ? 'font-bold underline' : ''} onClick={() => changePages('classement')}>
+                  <Label className={navigationMenuTriggerStyle()}>
+                  Classement
+                  </Label>
+                </NavigationMenuLink>
+                
+                <NavigationMenuLink asChild className={pages === 'profil' ? 'font-bold underline' : ''} onClick={() => changePages('profil')}>
+                  <Label className={navigationMenuTriggerStyle()}>
+                  Profil
+                  </Label>
+                </NavigationMenuLink>
+                
+                {Joueur.map((entry) => (
+                  <NavigationMenuLink asChild className={pages === 'Admin' ? 'font-bold underline' : ''} onClick={() => changePages('Admin')}>
+                    {entry.Administrateur == true ?(
+                      <Label className={navigationMenuTriggerStyle()}>
+                      Admin
+                      </Label>
+                    ):null}
+                    </NavigationMenuLink>
+                  ))
+                }
 
-              <NavigationMenuLink asChild>
-                <Label htmlFor="theme" className={navigationMenuTriggerStyle()}>
-                  <Switch onClick={changeTheme()} id='theme'/>
-                  {theme} Mode
-                </Label>
-              </NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Label htmlFor="theme" className={navigationMenuTriggerStyle()}>
+                    <Switch onClick={changeTheme()} id='theme'/>
+                    {theme} Mode
+                  </Label>
+                </NavigationMenuLink>
 
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      </section>) : null }
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </section>) : null }
       { pages === 'questionnaire' ?(
         <section id="questionnaire-section">
           { EtatQuestionnaire == 'stop' ? (
@@ -702,14 +702,14 @@ export default function Home() {
         </section>
       ) : pages === 'Admin' ?(
           <section id='admin-section' >
-            <div id="Admin-menu-section" className='fixed w-[15%]'>
-              <Card className='h-screen p-5 rounded-none shadow-none'>
+            <div id="Admin-menu-section" className='fixed w-[16%]'>
+              <Card className='h-screen p-2 pt-5 rounded-none shadow-none'>
                 <Button className={sous_menu === 'Statistique' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Statistique')}>Statistique</Button> 
                 <Button className={sous_menu === 'Questions' ? 'font-bold underline' : ''} onClick={() => setsous_menu('Questions')}>Éditeur de Questions</Button> 
                 <Button className={sous_menu === 'utilisateur' ? 'font-bold underline' : ''} onClick={() => setsous_menu('utilisateur')}>Gestionnaire d'utilisateur</Button> 
               </Card>
             </div>
-            <div id='Admin-panel-section' className='fixed w-[85%] h-screen ml-[15%]'>
+            <div id='Admin-panel-section' className='fixed w-[84%] h-screen ml-[16%]'>
               <Card className="max-w-auto w-[90%] mx-auto p-5 mt-[1%]">
                 <h1><b>{sous_menu} :</b></h1>
                 { sous_menu === 'Statistique' ?(
