@@ -95,13 +95,13 @@ export default function Home() {
   // - Les mots de passe ne correspondent pas
   // - Informations manquante
   // - Pseudo déjà utilisé
-  const [Erreur_Formulaire_inscription, setErreur_Formulaire_inscription] = useState<any>('false');
+  const [Erreur_Formulaire_inscription, setErreur_Formulaire_Inscription] = useState<any>('false');
 
   // ---------------------------------------------------------- login variables ---------------------------------------------------------- //
   function LoginOrRegister(param: string) {
     if (PageUser !== param){
       setPageUser(param);
-      setErreur_Formulaire_inscription('false');
+      setErreur_Formulaire_Inscription('false');
     }
   }
 
@@ -124,7 +124,7 @@ export default function Home() {
   }
 
   function ConnexionReussi(){
-    setErreur_Formulaire_inscription('false');
+    setErreur_Formulaire_Inscription('false');
     setPages('profil');
   }
   
@@ -136,7 +136,7 @@ export default function Home() {
   async function getLogin(e: React.FormEvent<HTMLFormElement>) {
     let EMail = login_email.current.value;
     let MDP = await sha256(login_MDP.current.value);
-    setErreur_Formulaire_inscription('false');
+    setErreur_Formulaire_Inscription('false');
 
     console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
@@ -148,11 +148,11 @@ export default function Home() {
       console.log(data);
       if (data.length === 0){
         console.log('Utilisateur non trouvé');
-        setErreur_Formulaire_inscription('Utilisateur non trouvé');
+        setErreur_Formulaire_Inscription('Utilisateur non trouvé');
         return;
       } else if (data[0].MDP_Hash !== MDP){
         console.log('Mot de passe incorrect');
-        setErreur_Formulaire_inscription('Mot de passe incorrect');
+        setErreur_Formulaire_Inscription('Mot de passe incorrect');
         return;
       } else {
         console.log('Connexion réussie');
@@ -172,7 +172,7 @@ export default function Home() {
     let EMail = Registre_email.current.value;
     let MDP = await sha256(Registre_MDP.current.value);
     let V_MDP = await sha256(Registre_Verif_MDP.current.value);
-    setErreur_Formulaire_inscription('false');
+    setErreur_Formulaire_Inscription('false');
 
     console.log('\nMail: ' + EMail);
     console.log('MDP: ' + MDP);
@@ -187,7 +187,7 @@ export default function Home() {
       fetchPseudoExist(Pseudo).then((data: any) => {
         if (data.length > 0){
           console.log('Pseudo déjà utilisé');
-          setErreur_Formulaire_inscription('Pseudo déjà utilisé');
+          setErreur_Formulaire_Inscription('Pseudo déjà utilisé');
           return;
         }
       });
@@ -196,15 +196,15 @@ export default function Home() {
       }
       if (data.length > 0){
         console.log('Utilisateur déjà existant');
-        setErreur_Formulaire_inscription('Utilisateur déjà existant');
+        setErreur_Formulaire_Inscription('Utilisateur déjà existant');
         return;
       } else if (Pseudo === '' || EMail === '' || Registre_MDP.current.value === '' || Registre_Verif_MDP.current.value === ''){
         console.log('Informations manquante');
-        setErreur_Formulaire_inscription('Informations manquante');
+        setErreur_Formulaire_Inscription('Informations manquante');
         return;
       } else if (MDP !== V_MDP){
         console.log('Les mots de passe ne correspondent pas');
-        setErreur_Formulaire_inscription('Les mots de passe ne correspondent pas');
+        setErreur_Formulaire_Inscription('Les mots de passe ne correspondent pas');
         return;
       } else {
         supabase
@@ -213,7 +213,7 @@ export default function Home() {
           .then(({ data, error }) => {
             if (error) {
               console.error('Erreur lors de l\'inscription:', error);
-              setErreur_Formulaire_inscription('Erreur lors de l\'inscription:');
+              setErreur_Formulaire_Inscription('Erreur lors de l\'inscription:');
               return;
             } 
             else {
@@ -222,11 +222,11 @@ export default function Home() {
                 console.log(data);
                 if (data.length === 0){
                   console.log('Utilisateur non trouvé');
-                  setErreur_Formulaire_inscription('Utilisateur non trouvé');
+                  setErreur_Formulaire_Inscription('Utilisateur non trouvé');
                   return;
                 } else if (data[0].MDP_Hash !== MDP){
                   console.log('Mot de passe incorrect');
-                  setErreur_Formulaire_inscription('Mot de passe incorrect');
+                  setErreur_Formulaire_Inscription('Mot de passe incorrect');
                   return;
                 } else {
                   console.log('Connexion réussie');
@@ -269,6 +269,7 @@ export default function Home() {
     }
 
   function rafraichir_classement() {
+    setClassement([]);
     supabase
       .from('classement')
       .select(` id, date_partie, score, temps, id_joueur, classements_joueurs:joueur (id, pseudo)`)
@@ -600,7 +601,7 @@ export default function Home() {
           )}
         </section>
       ) : pages === 'classement' ?( 
-        Classement ? (
+        Classement && Classement.length > 0 ? (
           <section id="classement-section">
             <Card className="max-w-4xl mx-auto mt-10">
               <div className="text-center mt-auto">
@@ -717,7 +718,7 @@ export default function Home() {
                   </section>
                 ) : sous_menu === 'Questions' ?(
                   <section id='Questions-section'>
-                    <form method="post" onSubmit={getRegistrationQuestion}>
+                    <form method="post" className='pl-5' onSubmit={getRegistrationQuestion}>
                       <Label className='mt-3 pb-2' htmlFor="Question_name">Question :</Label>
                       <Input type="text" placeholder="Question posé" id="Question_name" ref={Question_name}/>
 
