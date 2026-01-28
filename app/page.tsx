@@ -20,16 +20,24 @@ import { NavigationMenuLink } from '@radix-ui/react-navigation-menu';
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useTheme } from "next-themes"
 
 export default function Home() {
   // --------------------------------------------------------- various variables --------------------------------------------------------- //
-  const [theme, setTheme] = useState('light');
+  const [theme, setThemeColor] = useState('light');
+  const { setTheme } = useTheme();
   const [pages, setPages] = useState('login');
 
   // ------------------------------------------------------- various functionality ------------------------------------------------------- //
   function changeTheme() {
-    if (theme === 'light') return () => setTheme('dark');
-    else if (theme === 'dark') return () => setTheme('light');
+    if (theme === 'light') return () => {
+      setThemeColor('dark');
+      setTheme('dark');
+    }
+    else if (theme === 'dark') return () => {
+      setThemeColor('light');
+      setTheme('light');
+    }
   };
 
   function changePages(page: string) {
@@ -446,7 +454,8 @@ export default function Home() {
 
 
   return (
-    <body className={theme}>
+    <html lang="en" suppressHydrationWarning>
+    {/* <body className={theme}> */}
       { pages !== 'login' ?(
         <section id="navigation-section" className="flex justify-between items-center p-4 border-b shadow-sm">
           <NavigationMenu>
@@ -775,6 +784,7 @@ export default function Home() {
             </div>
           </section>
       ) : null }
-    </body>
+      {/* </body> */}
+    </html>
   );
 }
